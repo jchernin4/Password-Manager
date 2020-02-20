@@ -15,6 +15,7 @@ public class GUI {
     private JMenuBar menuBar;
     private JMenu fileMenu;
     private JMenuItem createNewDB;
+    private JMenuItem selectDB;
 
     public GUI() {
         frame = new JFrame();
