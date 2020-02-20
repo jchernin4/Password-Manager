@@ -5,10 +5,21 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.json.simple.JSONObject;
-import org.mindrot.jbcrypt.BCrypt;
 
 public class DatabaseReader {
     private File database;
@@ -27,7 +38,7 @@ public class DatabaseReader {
         this.database = database;
     }
 
-    public void createNewDatabase() throws IOException {
+    public void createNewDatabase() throws IOException, NoSuchAlgorithmException {
         File db = new File("./src/main/java/manager/databases/Passwords.pm");
         db.createNewFile();
 
@@ -35,13 +46,11 @@ public class DatabaseReader {
         HashMap<String, Object> obj = new HashMap<String, Object>();
 
         System.out.print("Enter a password to be the master password for your manager. ");
-        String masterPass = reader.readLine();
-        String salt = BCrypt.gensalt(10);
 
-        // masterPassword.put("Salt", salt);
-        // masterPassword.put("Pass", BCrypt.hashpw(masterPass, salt));
+        SecretKeySpec masterPass;
+        masterPass = stringToKey(reader.readLine());
 
-        obj.put("Master Password", masterPass);
+        // obj.put("Master Password", masterPass);
 
         /*
          * JSONArray misc = new JSONArray(); misc.add("Temp Password");
@@ -55,5 +64,34 @@ public class DatabaseReader {
         FileOutputStream outputStream = new FileOutputStream(db);
         outputStream.write(str.getBytes());
         outputStream.close();
+    }
+
+    public String encryptString(String str, SecretKeySpec key) throws NoSuchAlgorithmException, NoSuchPaddingException,
+            InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
+
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+
+        return Base64.getEncoder().encodeToString(cipher.doFinal(str.getBytes("UTF-8")));
+    }
+
+    public String decryptString(String str, SecretKeySpec key) throws InvalidKeyException, NoSuchAlgorithmException,
+            NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+
+        return new String(cipher.doFinal(Base64.getDecoder().decode(str)));
+    }
+
+    public SecretKeySpec stringToKey(String str) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+        MessageDigest sha = null;
+        byte[] key = str.getBytes("UTF-8");
+
+        sha = MessageDigest.getInstance("SHA-1");
+        key = sha.digest(key);
+        key = Arrays.copyOf(key, 16);
+
+        return new SecretKeySpec(key, "AES");
     }
 }
