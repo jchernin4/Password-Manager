@@ -30,10 +30,15 @@ public class GUI {
         fileMenu.getAccessibleContext().setAccessibleDescription("Menu for accessing database files");
         menuBar.add(fileMenu);
 
-        createNewDB = new JMenuItem("Create a new database", KeyEvent.VK_C);
+        createNewDB = new JMenuItem("Create new database", KeyEvent.VK_C);
         createNewDB.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK));
         createNewDB.getAccessibleContext().setAccessibleDescription("Creates a new database file");
         fileMenu.add(createNewDB);
+
+        selectDB = new JMenuItem("Select Database", KeyEvent.VK_S);
+        selectDB.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.ALT_MASK));
+        selectDB.getAccessibleContext().setAccessibleDescription("Browse for a new database file");
+        fileMenu.add(selectDB);
 
         frame.setJMenuBar(menuBar);
 
