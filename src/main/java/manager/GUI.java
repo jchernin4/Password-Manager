@@ -16,6 +16,7 @@ public class GUI {
     private JMenu fileMenu;
     private JMenuItem createNewDB;
     private JMenuItem selectDB;
+    private JMenuItem changePasswordItem;
 
     public GUI() {
         frame = new JFrame();
@@ -31,7 +32,7 @@ public class GUI {
         fileMenu.getAccessibleContext().setAccessibleDescription("Menu for accessing database files");
         menuBar.add(fileMenu);
 
-        createNewDB = new JMenuItem("Create new database", KeyEvent.VK_C);
+        createNewDB = new JMenuItem("Create New database", KeyEvent.VK_C);
         createNewDB.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK));
         createNewDB.getAccessibleContext().setAccessibleDescription("Creates a new database file");
         fileMenu.add(createNewDB);
@@ -40,6 +41,11 @@ public class GUI {
         selectDB.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.ALT_MASK));
         selectDB.getAccessibleContext().setAccessibleDescription("Browse for a new database file");
         fileMenu.add(selectDB);
+
+        changePasswordItem = new JMenuItem("Change Master Password", KeyEvent.VK_P);
+        changePasswordItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3, ActionEvent.ALT_MASK));
+        changePasswordItem.getAccessibleContext().setAccessibleDescription("Change the master password for the selected database file");
+        fileMenu.add(changePasswordItem);
 
         frame.setJMenuBar(menuBar);
 
