@@ -1,16 +1,24 @@
 package manager;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.IOException;
+
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class GUI {
+    private File database;
+    private File saveFolder;
+
     private JFrame frame;
     private JMenuBar menuBar;
     private JMenu fileMenu;
@@ -18,89 +26,162 @@ public class GUI {
     private JMenuItem selectDB;
     private JMenuItem changePasswordItem;
 
+    private JFileChooser databaseFileChooser;
+    private JFileChooser generalFileChooser;
+
+    private FileNameExtensionFilter databaseFilesFilter;
+    private FileNameExtensionFilter saveFileFilter;
+
     public GUI() {
         frame = new JFrame();
         menuBar = new JMenuBar();
+        databaseFileChooser = new JFileChooser();
+        generalFileChooser = new JFileChooser();
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setIconImage(new ImageIcon("./src/main/java/manager/resources/InfiniumLogo.png").getImage());
 
         frame.setTitle("Infinium's Password Manager");
 
-        fileMenu = new JMenu("File");
-        fileMenu.setMnemonic(KeyEvent.VK_F);
-        fileMenu.getAccessibleContext().setAccessibleDescription("Menu for accessing database files");
-        menuBar.add(fileMenu);
-
-        createNewDB = new JMenuItem("Create New database", KeyEvent.VK_C);
-        createNewDB.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK));
-        createNewDB.getAccessibleContext().setAccessibleDescription("Creates a new database file");
-        fileMenu.add(createNewDB);
-
-        selectDB = new JMenuItem("Select Database", KeyEvent.VK_S);
-        selectDB.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.ALT_MASK));
-        selectDB.getAccessibleContext().setAccessibleDescription("Browse for a new database file");
-        fileMenu.add(selectDB);
-
-        changePasswordItem = new JMenuItem("Change Master Password", KeyEvent.VK_P);
-        changePasswordItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3, ActionEvent.ALT_MASK));
-        changePasswordItem.getAccessibleContext().setAccessibleDescription("Change the master password for the selected database file");
-        fileMenu.add(changePasswordItem);
-
-        frame.setJMenuBar(menuBar);
+        initMenuBar();
 
         frame.pack();
         frame.setSize(500, 400);
 
         frame.setVisible(true);
+    }
 
-        /*
-         * //a group of JMenuItems menuItem = new JMenuItem("A text-only menu item",
-         * KeyEvent.VK_T); menuItem.setAccelerator(KeyStroke.getKeyStroke(
-         * KeyEvent.VK_1, ActionEvent.ALT_MASK));
-         * menuItem.getAccessibleContext().setAccessibleDescription(
-         * "This doesn't really do anything"); menu.add(menuItem);
-         * 
-         * menuItem = new JMenuItem("Both text and icon", new
-         * ImageIcon("images/middle.gif")); menuItem.setMnemonic(KeyEvent.VK_B);
-         * menu.add(menuItem);
-         * 
-         * menuItem = new JMenuItem(new ImageIcon("images/middle.gif"));
-         * menuItem.setMnemonic(KeyEvent.VK_D); menu.add(menuItem);
-         * 
-         * //a group of radio button menu items menu.addSeparator(); ButtonGroup group =
-         * new ButtonGroup(); rbMenuItem = new
-         * JRadioButtonMenuItem("A radio button menu item");
-         * rbMenuItem.setSelected(true); rbMenuItem.setMnemonic(KeyEvent.VK_R);
-         * group.add(rbMenuItem); menu.add(rbMenuItem);
-         * 
-         * rbMenuItem = new JRadioButtonMenuItem("Another one");
-         * rbMenuItem.setMnemonic(KeyEvent.VK_O); group.add(rbMenuItem);
-         * menu.add(rbMenuItem);
-         * 
-         * //a group of check box menu items menu.addSeparator(); cbMenuItem = new
-         * JCheckBoxMenuItem("A check box menu item");
-         * cbMenuItem.setMnemonic(KeyEvent.VK_C); menu.add(cbMenuItem);
-         * 
-         * cbMenuItem = new JCheckBoxMenuItem("Another one");
-         * cbMenuItem.setMnemonic(KeyEvent.VK_H); menu.add(cbMenuItem);
-         * 
-         * //a submenu menu.addSeparator(); submenu = new JMenu("A submenu");
-         * submenu.setMnemonic(KeyEvent.VK_S);
-         * 
-         * menuItem = new JMenuItem("An item in the submenu");
-         * menuItem.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_2,
-         * ActionEvent.ALT_MASK)); submenu.add(menuItem);
-         * 
-         * menuItem = new JMenuItem("Another item"); submenu.add(menuItem);
-         * menu.add(submenu);
-         * 
-         * //Build second menu in the menu bar. menu = new JMenu("Another Menu");
-         * menu.setMnemonic(KeyEvent.VK_N);
-         * menu.getAccessibleContext().setAccessibleDescription(
-         * "This menu does nothing"); menuBar.add(menu);
-         * 
-         * ... frame.setJMenuBar(theJMenuBar);
-         */
+    /**
+     * Initialize Menu bar for GUI
+     */
+    public void initMenuBar() {
+        fileMenu = new JMenu("File");
+        fileMenu.setMnemonic(KeyEvent.VK_F);
+        fileMenu.getAccessibleContext().setAccessibleDescription("Menu for accessing database files");
+
+        createNewDB = new JMenuItem("Create New database", KeyEvent.VK_C);
+        createNewDB.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK));
+        createNewDB.getAccessibleContext().setAccessibleDescription("Creates a new database file");
+
+        createNewDB.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ev) {
+                try {
+                    setDatabase(saveFileDialog());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        selectDB = new JMenuItem("Select Database", KeyEvent.VK_S);
+        selectDB.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.ALT_MASK));
+        selectDB.getAccessibleContext().setAccessibleDescription("Browse for a new database file");
+
+        selectDB.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ev) {
+                setDatabase(selectFile());
+            }
+        });
+
+        changePasswordItem = new JMenuItem("Change Master Password", KeyEvent.VK_P);
+        changePasswordItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3, ActionEvent.ALT_MASK));
+        changePasswordItem.getAccessibleContext()
+                .setAccessibleDescription("Change the master password for the selected database file");
+
+        menuBar.add(fileMenu);
+        fileMenu.add(createNewDB);
+        fileMenu.add(selectDB);
+        fileMenu.add(changePasswordItem);
+
+        frame.setJMenuBar(menuBar);
+    }
+
+    /**
+     * Allows user to select a file
+     * 
+     * @return Selected file
+     */
+    public File selectFile() {
+        databaseFileChooser.setCurrentDirectory(new File("."));
+
+        databaseFileChooser.setDialogTitle("Choose a database file");
+
+        databaseFilesFilter = new FileNameExtensionFilter("PasswordManager files", "pm");
+        databaseFileChooser.setFileFilter(databaseFilesFilter);
+
+        File selectedFile = new File("NO FILE SELECTED");
+
+        int result = databaseFileChooser.showOpenDialog(frame);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            selectedFile = databaseFileChooser.getSelectedFile();
+            System.out.println("Selected file: " + selectedFile.getAbsolutePath());
+        } else {
+            System.out.println("Canceled database file select.");
+        }
+
+        return selectedFile;
+    }
+
+    public File selectFolder() {
+        generalFileChooser.setCurrentDirectory(new File("."));
+        generalFileChooser.setDialogTitle("Select a folder to save the new database to");
+
+        generalFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY); // Sets search for only folders
+        generalFileChooser.setAcceptAllFileFilterUsed(false); // Does not allow files to be selected
+
+        File selectedFolder = new File("NO FILE SELECTED");
+
+        int result = generalFileChooser.showOpenDialog(frame);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            selectedFolder = generalFileChooser.getSelectedFile();
+            System.out.println("Selected folder: " + generalFileChooser.getSelectedFile());
+        } else {
+            System.out.println("Cancelled folder select.");
+        }
+
+        return selectedFolder;
+    }
+
+    public File saveFileDialog() throws IOException {
+        generalFileChooser.setCurrentDirectory(new File("."));
+        generalFileChooser.setDialogTitle("Specify where to save database file");
+        generalFileChooser.setSelectedFile(new File("Passwords.pm"));
+
+        saveFileFilter = new FileNameExtensionFilter("PasswordManager files", "pm");
+        generalFileChooser.setFileFilter(saveFileFilter);
+
+        File fileToSave = new File("NO FILE SELECTED");
+
+        int result = generalFileChooser.showSaveDialog(frame);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            fileToSave = generalFileChooser.getSelectedFile();
+            fileToSave.createNewFile();
+
+            System.out.println("Saved new database file: " + fileToSave.getAbsolutePath());
+        } else {
+            System.out.println("Cancelled saving new database file.");
+        }
+
+        return fileToSave;
+    }
+
+    /**
+     * Sets the database
+     * 
+     * @param database Database to set the current database to
+     */
+    public void setDatabase(File database) {
+        this.database = database;
+    }
+
+    /**
+     * Sets the save folder
+     * 
+     * @param folder Folder to set the current save folder to
+     */
+    public void setSaveFolder(File folder) {
+        this.saveFolder = folder;
     }
 }
