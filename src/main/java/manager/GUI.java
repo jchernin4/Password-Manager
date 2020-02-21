@@ -27,6 +27,7 @@ public class GUI {
     private JMenuItem changePasswordItem;
 
     private JFileChooser databaseFileChooser;
+    private JFileChooser saveFolderChooser;
     private JFileChooser generalFileChooser;
 
     private FileNameExtensionFilter databaseFilesFilter;
@@ -37,6 +38,7 @@ public class GUI {
         menuBar = new JMenuBar();
         databaseFileChooser = new JFileChooser();
         generalFileChooser = new JFileChooser();
+        saveFolderChooser = new JFileChooser();
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setIconImage(new ImageIcon("./src/main/java/manager/resources/InfiniumLogo.png").getImage());
@@ -66,10 +68,17 @@ public class GUI {
         createNewDB.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ev) {
+                File file = new File(new String());
                 try {
-                    setDatabase(saveFileDialog());
+                    file = saveFileDialog();
                 } catch (IOException e) {
                     e.printStackTrace();
+                }
+                if (!file.getName().equals("NO_FILE_SELECTED")) {
+                    System.out.println("Database file saved");
+                    setDatabase(file);
+                } else {
+                    System.out.println("No database file saved");
                 }
             }
         });
@@ -81,7 +90,13 @@ public class GUI {
         selectDB.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ev) {
-                setDatabase(selectFile());
+                File file = selectFile();
+                if (!file.getName().equals("NO_FILE_SELECTED")) {
+                    System.out.println("Database file selected");
+                    setDatabase(file);
+                } else {
+                    System.out.println("No database file selected");
+                }
             }
         });
 
@@ -111,7 +126,7 @@ public class GUI {
         databaseFilesFilter = new FileNameExtensionFilter("PasswordManager files", "pm");
         databaseFileChooser.setFileFilter(databaseFilesFilter);
 
-        File selectedFile = new File("NO FILE SELECTED");
+        File selectedFile = new File("NO_FILE_SELECTED");
 
         int result = databaseFileChooser.showOpenDialog(frame);
         if (result == JFileChooser.APPROVE_OPTION) {
@@ -125,18 +140,18 @@ public class GUI {
     }
 
     public File selectFolder() {
-        generalFileChooser.setCurrentDirectory(new File("."));
-        generalFileChooser.setDialogTitle("Select a folder to save the new database to");
+        saveFolderChooser.setCurrentDirectory(new File("."));
+        saveFolderChooser.setDialogTitle("Select a folder to save the new database to");
 
-        generalFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY); // Sets search for only folders
-        generalFileChooser.setAcceptAllFileFilterUsed(false); // Does not allow files to be selected
+        saveFolderChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY); // Sets search for only folders
+        saveFolderChooser.setAcceptAllFileFilterUsed(false); // Does not allow files to be selected
 
-        File selectedFolder = new File("NO FILE SELECTED");
+        File selectedFolder = new File("NO_FILE_SELECTED");
 
-        int result = generalFileChooser.showOpenDialog(frame);
+        int result = saveFolderChooser.showOpenDialog(frame);
         if (result == JFileChooser.APPROVE_OPTION) {
-            selectedFolder = generalFileChooser.getSelectedFile();
-            System.out.println("Selected folder: " + generalFileChooser.getSelectedFile());
+            selectedFolder = saveFolderChooser.getSelectedFile();
+            System.out.println("Selected folder: " + saveFolderChooser.getSelectedFile());
         } else {
             System.out.println("Cancelled folder select.");
         }
@@ -152,7 +167,7 @@ public class GUI {
         saveFileFilter = new FileNameExtensionFilter("PasswordManager files", "pm");
         generalFileChooser.setFileFilter(saveFileFilter);
 
-        File fileToSave = new File("NO FILE SELECTED");
+        File fileToSave = new File("NO_FILE_SELECTED");
 
         int result = generalFileChooser.showSaveDialog(frame);
         if (result == JFileChooser.APPROVE_OPTION) {
