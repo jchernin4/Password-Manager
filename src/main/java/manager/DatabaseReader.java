@@ -45,12 +45,13 @@ public class DatabaseReader {
         HashMap<String, Object> masterPassword = new HashMap<String, Object>();
         HashMap<String, Object> obj = new HashMap<String, Object>();
 
-        System.out.print("Enter a password to be the master password for your manager. ");
+        // System.out.print("Enter a password to be the master password for your
+        // manager. ");
 
         SecretKeySpec masterPass;
         masterPass = stringToKey(reader.readLine());
 
-        // obj.put("Master Password", masterPass);
+        obj.put("Master Password", masterPass);
 
         /*
          * JSONArray misc = new JSONArray(); misc.add("Temp Password");
@@ -58,10 +59,13 @@ public class DatabaseReader {
          */
 
         JSONObject objJSON = new JSONObject(obj);
-
         String str = objJSON.toJSONString();
 
+        String headerString = "--- Infinium Password Manager File DO NOT edit this header. Doing so will result in data corruption. ---";
+
         FileOutputStream outputStream = new FileOutputStream(db);
+
+        outputStream.write(headerString.getBytes());
         outputStream.write(str.getBytes());
         outputStream.close();
     }
